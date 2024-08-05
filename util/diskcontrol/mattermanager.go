@@ -1,7 +1,7 @@
 package diskcontrol
 
 import (
-	mm "daily_matter/util/mattermanager"
+	mm "daily_matter/logic/mattermanager"
 	"encoding/json"
 )
 
@@ -14,6 +14,7 @@ const (
 )
 
 // 暂时使用json读写
+
 func (c *ManagerControler) Load() error {
 	jsonByte, err := LoadJSON(matterManagerFile)
 	if err != nil {
