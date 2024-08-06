@@ -1,34 +1,25 @@
 package dailymatter
 
 import (
+	"daily_matter/entity"
 	"fmt"
 
 	"github.com/liushuochen/gotable"
 )
 
-/*
-type Matter struct {
-	Title       string
-	Desc        string
-	TimeStart   time.Time
-	TimeEnd     time.Time
-	State       constant.State
-	MatterClock *Clock
-}
-*/
 // 暂时在控制台Display
-func display() {
+func Display() {
 	if currInfo == nil {
 		fmt.Printf("empty manager\n")
 		return
 	}
 	fmt.Printf("user: %s\n", currInfo.User.Name)
-	showTable()
+	ShowTable()
 }
 
-func showTable() {
-	header := []string{"Title", "Desc", "TimeStart", "TimeEnd", "State"}
-	table, err := gotable.CreateSafeTable(header...)
+func ShowTable() {
+	matter := &entity.Matter{}
+	table, err := gotable.CreateSafeTable(matter.GetLabel()...)
 	if err != nil {
 		fmt.Printf("create table failed: %v\n", err)
 		return

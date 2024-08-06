@@ -6,7 +6,7 @@ import (
 )
 
 // state 排序逻辑
-var stateOrder = []string{
+var allState = []string{
 	constant.StateUnknown,
 	constant.StateUnplanned,
 	constant.StatePlanned,
@@ -16,5 +16,9 @@ var stateOrder = []string{
 }
 
 func LessState(i, j string) bool {
-	return slices.Index(stateOrder, i) < slices.Index(stateOrder, j)
+	return slices.Index(allState, i) < slices.Index(allState, j)
+}
+
+func GetAllState() []string {
+	return allState
 }

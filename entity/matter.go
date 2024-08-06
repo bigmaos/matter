@@ -13,6 +13,10 @@ type Matter struct {
 	MatterClock *Clock
 }
 
+func (m *Matter) GetLabel() []string {
+	return []string{"Title", "Desc", "TimeStart", "TimeEnd", "State"}
+}
+
 func (m *Matter) Print() []string {
 	return []string{m.Title, m.Desc, m.TimeStart.String(), m.TimeEnd.String(), m.State}
 }

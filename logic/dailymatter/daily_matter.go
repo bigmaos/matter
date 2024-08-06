@@ -46,7 +46,7 @@ func InsertNewMatter(info entity.InsertedMatterInfo) error {
 		Desc:  info.Desc,
 		State: constant.StateUnplanned,
 	}
-	if ok {
+	if ok && info.StartTimeFromNow != 0 && info.EndTimeFromNow != 0 {
 		timeStart := timeNow.Add(timeGap * time.Duration(info.StartTimeFromNow))
 		timeEnd := timeNow.Add(timeGap * time.Duration(info.EndTimeFromNow))
 		matter.SetStartTime(timeStart)
