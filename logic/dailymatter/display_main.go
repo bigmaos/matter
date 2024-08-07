@@ -9,11 +9,11 @@ import (
 
 // 暂时在控制台Display
 func Display() {
-	if currInfo == nil {
+	if currInfo == nil || currInfo.User == nil {
 		fmt.Printf("empty manager\n")
 		return
 	}
-	fmt.Printf("user: %s\n", currInfo.User.Name)
+	fmt.Printf("user: %s\n", currInfo.User.GetName())
 	ShowTable()
 }
 

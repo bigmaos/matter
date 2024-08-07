@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var GapUnitMap map[string]time.Duration
+var GapUnitMap = map[string]time.Duration{}
 
 // 默认30天一个月
 func init() {

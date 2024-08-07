@@ -10,9 +10,9 @@ import (
 	"time"
 )
 
-var currInfo *entity.CurrMattersInfo
+var currInfo = entity.NewCurrMattersInfo()
 
-func init() {
+func Init() {
 	manager := mm.Manager
 	// 初始化时，只拿其中一个用户的matter
 	for _, matters := range manager.GetUserMatters() {
@@ -21,6 +21,9 @@ func init() {
 			currInfo.Matters = append(currInfo.Matters, matter)
 		}
 		break
+	}
+	if currInfo == nil {
+		return
 	}
 	sort.Slice(currInfo.Matters, func(i, j int) bool {
 		return state.LessState(currInfo.Matters[i].GetState(), currInfo.Matters[j].GetState())
@@ -60,4 +63,13 @@ func ChangeMatterState(matterid string, state string) {
 	manager := mm.Manager
 	userid := currInfo.User.GetName()
 	manager.GetUserMatters()[userid].GetMatters()[matterid].SetState(state)
+}
+
+func Save() error {
+	c := mm.Controler
+	err := c.Save()
+	if err != nil {
+		return err
+	}
+	return nil
 }

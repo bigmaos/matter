@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cast"
 )
 
-var argsTooShort = fmt.Errorf("args too short")
 var argsNotMatch = fmt.Errorf("args not match")
 
 func CommandManager(args ...string) {
@@ -23,8 +22,8 @@ func CommandManager(args ...string) {
 		break
 	case "adduser":
 		{
-			if len(args) <= 2 {
-				fmt.Printf("addUser err: %v", argsTooShort)
+			if len(args) != 2 {
+				fmt.Printf("addUser err: %v", argsNotMatch)
 			}
 			NewUserCommand(args[1])
 			break
@@ -32,22 +31,56 @@ func CommandManager(args ...string) {
 	case "addmatter":
 		{
 			// 不含时间
-			if len(args) == 5 {
-				info := []string{args[2], args[3], args[4]}
+			if len(args) == 4 {
+				info := []string{args[2], args[3]}
 				NewMatterCommand(args[1], nil, info)
-			} else if len(args) == 7 {
+			} else if len(args) == 6 {
 				// 含时间
 				time := []int64{cast.ToInt64(args[2]), cast.ToInt64(args[3])}
-				info := []string{args[4], args[5], args[6]}
+				info := []string{args[4], args[5]}
 				NewMatterCommand(args[1], time, info)
 			} else {
 				fmt.Printf("addMatter err: %v", argsNotMatch)
 			}
-
+			break
+		}
+	case "getstate":
+		{
+			GetStateCommand()
+			break
+		}
+	case "changestate":
+		{
+			if len(args) != 3 {
+				fmt.Printf("changeState err: %v", argsNotMatch)
+			}
+			ChangeStateCommand(args[1], cast.ToInt(args[2]))
+			break
+		}
+	case "save":
+		{
+			Save()
+			break
+		}
+	case "exit":
+		{
+			Exit()
+			break
 		}
 
+	default:
+		Help()
 	}
 
+}
+
+func Help() {
+	fmt.Printf("CommandManager help:\n")
+	fmt.Printf("[display]:                                                     	display all matter\n")
+	fmt.Printf("[adduser $usrname]:                                            	add user\n")
+	fmt.Printf("[addmatter $gapUnit option{$startTime $endTime} $title $desc]: 	add matter\n")
+	fmt.Printf("[getstate]:                                                    	get all state\n")
+	fmt.Printf("[changestate $matterTitle $stateNumber]:                       	change matter state\n")
 }
 
 func DisplayCommand() {
@@ -83,7 +116,6 @@ func NewMatterCommand(gapUnit string, timeFromNow []int64, info []string) {
 		EndTimeFromNow:   timeFromNow[1],
 		Title:            info[0],
 		Desc:             info[1],
-		State:            info[2],
 	}
 	err := dailymatter.InsertNewMatter(matterInfo)
 	if err != nil {
@@ -105,4 +137,16 @@ func ChangeStateCommand(matterTitle string, stateIdx int) {
 		fmt.Printf("ChangeStateCommand err: %v", fmt.Errorf("idx out of range"))
 	}
 	dailymatter.ChangeMatterState(matterTitle, states[stateIdx])
+}
+
+func Save() {
+	err := dailymatter.Save()
+	if err != nil {
+		fmt.Printf("Save err: %v", err)
+	}
+}
+
+func Exit() {
+	Save()
+	fmt.Printf("Exiting...")
 }

@@ -3,11 +3,11 @@ package mattermanager
 import (
 	"daily_matter/constant"
 	"daily_matter/entity"
-	"daily_matter/util/diskcontrol"
 	"fmt"
 )
 
 var Manager *MatterManager
+var Controler *ManagerControler
 
 type MatterManager struct {
 	UserMatters map[string]*MatterSingleUser `json:"user_matters"`
@@ -19,26 +19,31 @@ type MatterSingleUser struct {
 }
 
 func NewMatterManager() *MatterManager {
+	um := make(map[string]*MatterSingleUser)
 	return &MatterManager{
-		UserMatters: make(map[string]*MatterSingleUser),
+		UserMatters: um,
 	}
 }
 
 func Init() {
-	c := diskcontrol.ManagerControler{}
+	c := &ManagerControler{}
+	Controler = c
 	err := c.Load()
 	if err != nil {
-		fmt.Printf("load manager error:%v", err)
+		fmt.Printf("load manager error:%v\n", err)
 		Manager = NewMatterManager()
+		c.MatterManager = Manager
 		return
 	}
 	Manager = c.MatterManager
-	defer func() {
-		err := c.Save()
-		if err != nil {
-			fmt.Printf("save manager error:%v", err)
-		}
-	}()
+}
+
+func Save() {
+	Controler.MatterManager.DeleteDoneMatter()
+	err := Controler.Save()
+	if err != nil {
+		fmt.Printf("save manager error:%v", err)
+	}
 }
 
 func (m *MatterManager) GetUserMatters() map[string]*MatterSingleUser {

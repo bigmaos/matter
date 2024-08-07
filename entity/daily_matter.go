@@ -5,6 +5,10 @@ type CurrMattersInfo struct {
 	User    *User
 }
 
+func NewCurrMattersInfo() *CurrMattersInfo {
+	return &CurrMattersInfo{}
+}
+
 type InsertedMatterInfo struct {
 	TimeGap          string
 	StartTimeFromNow int64

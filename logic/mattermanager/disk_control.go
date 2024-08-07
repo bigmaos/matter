@@ -1,12 +1,13 @@
-package diskcontrol
+package mattermanager
 
 import (
-	mm "daily_matter/logic/mattermanager"
+	dc "daily_matter/util/diskcontrol"
 	"encoding/json"
+	"fmt"
 )
 
 type ManagerControler struct {
-	MatterManager *mm.MatterManager
+	MatterManager *MatterManager
 }
 
 const (
@@ -16,14 +17,15 @@ const (
 // 暂时使用json读写
 
 func (c *ManagerControler) Load() error {
-	jsonByte, err := LoadJSON(matterManagerFile)
+	jsonByte, err := dc.LoadJSON(matterManagerFile)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(jsonByte, c.MatterManager)
+	err = json.Unmarshal(jsonByte, &c.MatterManager)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("load matter manager: %v\n", c.MatterManager)
 	return nil
 }
 
@@ -32,9 +34,13 @@ func (c *ManagerControler) Save() error {
 	if err != nil {
 		return err
 	}
-	err = SaveJSON(matterManagerFile, jsonBytes)
+	if len(jsonBytes) == 0 {
+		return fmt.Errorf("json bytes is empty")
+	}
+	err = dc.SaveJSON(matterManagerFile, jsonBytes)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("save matter manager: %v\n", c.MatterManager)
 	return nil
 }
