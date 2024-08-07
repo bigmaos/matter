@@ -23,7 +23,8 @@ func CommandManager(args ...string) {
 	case "adduser":
 		{
 			if len(args) != 2 {
-				fmt.Printf("addUser err: %v", argsNotMatch)
+				fmt.Printf("addUser err: %v\n", argsNotMatch)
+				break
 			}
 			NewUserCommand(args[1])
 			break
@@ -31,16 +32,16 @@ func CommandManager(args ...string) {
 	case "addmatter":
 		{
 			// 不含时间
-			if len(args) == 4 {
-				info := []string{args[2], args[3]}
-				NewMatterCommand(args[1], nil, info)
+			if len(args) == 3 {
+				info := []string{args[1], args[2]}
+				NewMatterCommand(nil, info)
 			} else if len(args) == 6 {
 				// 含时间
-				time := []int64{cast.ToInt64(args[2]), cast.ToInt64(args[3])}
+				time := []string{args[1], args[2], args[3]}
 				info := []string{args[4], args[5]}
-				NewMatterCommand(args[1], time, info)
+				NewMatterCommand(time, info)
 			} else {
-				fmt.Printf("addMatter err: %v", argsNotMatch)
+				fmt.Printf("addMatter err: %v\n", argsNotMatch)
 			}
 			break
 		}
@@ -52,7 +53,8 @@ func CommandManager(args ...string) {
 	case "changestate":
 		{
 			if len(args) != 3 {
-				fmt.Printf("changeState err: %v", argsNotMatch)
+				fmt.Printf("changeState err: %v\n", argsNotMatch)
+				break
 			}
 			ChangeStateCommand(args[1], cast.ToInt(args[2]))
 			break
@@ -78,7 +80,7 @@ func Help() {
 	fmt.Printf("CommandManager help:\n")
 	fmt.Printf("[display]:                                                     	display all matter\n")
 	fmt.Printf("[adduser $usrname]:                                            	add user\n")
-	fmt.Printf("[addmatter $gapUnit option{$startTime $endTime} $title $desc]: 	add matter\n")
+	fmt.Printf("[addmatter option{$gapUnit $startTime $endTime} $title $desc]: 	add matter\n")
 	fmt.Printf("[getstate]:                                                    	get all state\n")
 	fmt.Printf("[changestate $matterTitle $stateNumber]:                       	change matter state\n")
 }
@@ -106,17 +108,21 @@ type InsertedMatterInfo struct {
 
 */
 
-func NewMatterCommand(gapUnit string, timeFromNow []int64, info []string) {
-	if len(timeFromNow) != 2 || len(info) != 3 {
+func NewMatterCommand(time []string, info []string) {
+	if len(info) != 2 {
 		fmt.Printf("NewMatterCommand err: %v", fmt.Errorf("format illegal"))
+		return
 	}
 	var matterInfo = entity.InsertedMatterInfo{
-		TimeGap:          gapUnit,
-		StartTimeFromNow: timeFromNow[0],
-		EndTimeFromNow:   timeFromNow[1],
-		Title:            info[0],
-		Desc:             info[1],
+		Title: info[0],
+		Desc:  info[1],
 	}
+	if len(time) == 3 {
+		matterInfo.TimeGap = time[0]
+		matterInfo.StartTimeFromNow = cast.ToInt64(time[1])
+		matterInfo.EndTimeFromNow = cast.ToInt64(time[2])
+	}
+
 	err := dailymatter.InsertNewMatter(matterInfo)
 	if err != nil {
 		fmt.Printf("NewMatterCommand err: %v", err)
@@ -127,7 +133,7 @@ func GetStateCommand() {
 	states := state.GetAllState()
 	fmt.Printf("All State hash: \nindex:\t\tstate\n")
 	for i, v := range states {
-		fmt.Printf("%-*d %-*s", 3, i, 20, v)
+		fmt.Printf("%-*d %-*s \n", 15, i, 20, v)
 	}
 }
 

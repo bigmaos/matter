@@ -66,6 +66,7 @@ func (m *MatterSingleUser) RegisterMatter(matter *entity.Matter) error {
 		return fmt.Errorf("matter %s already exists", matter.GetTitle())
 	}
 	m.GetMatters()[matter.GetTitle()] = matter
+	fmt.Printf("register matter %s success, \nwith value: %v\n", matter.GetTitle(), matter)
 	return nil
 }
 
