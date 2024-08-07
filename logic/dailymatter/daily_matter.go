@@ -67,6 +67,7 @@ func ChangeMatterState(matterid string, state string) {
 
 func Save() error {
 	c := mm.Controler
+	c.MatterManager.DeleteDoneMatter()
 	err := c.Save()
 	if err != nil {
 		return err
