@@ -45,12 +45,16 @@ func InsertNewMatter(info entity.InsertedMatterInfo) error {
 	manager := mm.Manager
 	var timeNow = time.Now()
 	timeGap, ok := mattertime.GapUnitMap[info.TimeGap]
+	// 默认按天为gap单位
+	if !ok {
+		timeGap = mattertime.GapUnitMap[constant.TimeGapUnitDay]
+	}
 	matter := &entity.Matter{
 		Title: info.Title,
 		Desc:  info.Desc,
 		State: constant.StateUnplanned,
 	}
-	if ok && info.StartTimeFromNow != 0 && info.EndTimeFromNow != 0 {
+	if info.StartTimeFromNow != 0 && info.EndTimeFromNow != 0 {
 		timeStart := timeNow.Add(timeGap * time.Duration(info.StartTimeFromNow))
 		timeEnd := timeNow.Add(timeGap * time.Duration(info.EndTimeFromNow))
 		matter.SetStartTime(timeStart)
