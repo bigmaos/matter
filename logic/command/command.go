@@ -146,7 +146,7 @@ type InsertedMatterInfo struct {
 
 func (c *CommandManager) NewMatterCommand(time []string, info []string) {
 	if len(info) != 2 {
-		fmt.Printf("NewMatterCommand err: %v", fmt.Errorf("format illegal"))
+		fmt.Printf("NewMatterCommand err: %v\n", fmt.Errorf("format illegal"))
 		return
 	}
 	var matterInfo = entity.InsertedMatterInfo{
@@ -161,7 +161,7 @@ func (c *CommandManager) NewMatterCommand(time []string, info []string) {
 
 	err := dailymatter.InsertNewMatter(matterInfo)
 	if err != nil {
-		fmt.Printf("NewMatterCommand err: %v", err)
+		fmt.Printf("NewMatterCommand err: %v\n", err)
 	}
 }
 
@@ -176,36 +176,36 @@ func (c *CommandManager) GetStateCommand() {
 func (c *CommandManager) ChangeStateCommand(matterTitle string, stateIdx int) {
 	states := state.GetAllState()
 	if stateIdx >= len(states) {
-		fmt.Printf("ChangeStateCommand err: %v", fmt.Errorf("idx out of range"))
+		fmt.Printf("ChangeStateCommand err: %v\n", fmt.Errorf("idx out of range"))
 	}
 	err := dailymatter.ChangeMatterState(matterTitle, states[stateIdx])
 	if err != nil {
-		fmt.Printf("ChangeStateCommand err: %v", err)
+		fmt.Printf("ChangeStateCommand err: %v\n", err)
 	}
 }
 
 func (c *CommandManager) ChangeUserCommand(userid string) {
 	err := dailymatter.ChangeCurrUser(userid)
 	if err != nil {
-		fmt.Printf("ChangeUserCommand err: %v", err)
+		fmt.Printf("ChangeUserCommand err: %v\n", err)
 	}
 }
 
 func (c *CommandManager) Save() {
 	err := dailymatter.Save()
 	if err != nil {
-		fmt.Printf("Save err: %v", err)
+		fmt.Printf("Save err: %v\n", err)
 	}
 }
 
 func (c *CommandManager) Fresh() {
 	err := dailymatter.FreshCurrInfo()
 	if err != nil {
-		fmt.Printf("Fresh err: %v", err)
+		fmt.Printf("Fresh err: %v\n", err)
 	}
 }
 
 func (c *CommandManager) Exit() {
 	c.Save()
-	fmt.Printf("Exiting...")
+	fmt.Printf("Exiting...\n")
 }
