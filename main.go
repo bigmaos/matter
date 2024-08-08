@@ -13,10 +13,13 @@ func main() {
 	mattermanager.Init()
 	dailymatter.Init()
 
+	dp := dailymatter.DisplayConsolePacker{}
+	cm := command.NewCommandManager(dp)
+
 	input := bufio.NewScanner(os.Stdin)
 	for input.Scan() {
 		args := strings.Split(input.Text(), " ")
-		command.CommandManager(args...)
+		cm.Manager(args...)
 
 		if input.Text() == "exit" {
 			break

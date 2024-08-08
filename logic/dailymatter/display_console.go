@@ -7,17 +7,20 @@ import (
 	"github.com/liushuochen/gotable"
 )
 
+type DisplayConsolePacker struct {
+}
+
 // 暂时在控制台Display
-func Display() {
+func (d DisplayConsolePacker) Display() {
 	if currInfo == nil || currInfo.User == nil {
 		fmt.Printf("empty manager\n")
 		return
 	}
 	fmt.Printf("user: %s\n", currInfo.User.GetName())
-	ShowTable()
+	d.ShowTable()
 }
 
-func ShowTable() {
+func (d DisplayConsolePacker) ShowTable() {
 	matter := &entity.Matter{}
 	table, err := gotable.CreateSafeTable(matter.GetLabel()...)
 	if err != nil {

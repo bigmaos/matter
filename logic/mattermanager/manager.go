@@ -4,6 +4,7 @@ import (
 	"daily_matter/constant"
 	"daily_matter/entity"
 	"fmt"
+	"sync"
 )
 
 var Manager *MatterManager
@@ -16,6 +17,7 @@ type MatterManager struct {
 type MatterSingleUser struct {
 	User    *entity.User              `json:"user"`
 	Matters map[string]*entity.Matter `json:"matters"`
+	Mu      sync.Mutex                `json:"-"`
 }
 
 func NewMatterManager() *MatterManager {

@@ -11,14 +11,30 @@ import (
 
 var argsNotMatch = fmt.Errorf("args not match")
 
-func CommandManager(args ...string) {
+type CommandManager struct {
+	dp dailymatter.DisplayPacker
+}
+
+func NewCommandManager(packer dailymatter.DisplayPacker) *CommandManager {
+	// 无传入：默认控制台Display
+	if packer == nil {
+		return &CommandManager{
+			dp: dailymatter.DisplayConsolePacker{},
+		}
+	}
+	return &CommandManager{
+		dp: packer,
+	}
+}
+
+func (c *CommandManager) Manager(args ...string) {
 	if len(args) == 0 {
 		return
 	}
 
 	switch args[0] {
 	case "display":
-		DisplayCommand()
+		c.DisplayCommand()
 		break
 	case "adduser":
 		{
@@ -26,7 +42,7 @@ func CommandManager(args ...string) {
 				fmt.Printf("addUser err: %v\n", argsNotMatch)
 				break
 			}
-			NewUserCommand(args[1])
+			c.NewUserCommand(args[1])
 			break
 		}
 	case "addmatter":
@@ -34,12 +50,12 @@ func CommandManager(args ...string) {
 			// 不含时间
 			if len(args) == 3 {
 				info := []string{args[1], args[2]}
-				NewMatterCommand(nil, info)
+				c.NewMatterCommand(nil, info)
 			} else if len(args) == 6 {
 				// 含时间
 				time := []string{args[1], args[2], args[3]}
 				info := []string{args[4], args[5]}
-				NewMatterCommand(time, info)
+				c.NewMatterCommand(time, info)
 			} else {
 				fmt.Printf("addMatter err: %v\n", argsNotMatch)
 			}
@@ -47,7 +63,7 @@ func CommandManager(args ...string) {
 		}
 	case "getstate":
 		{
-			GetStateCommand()
+			c.GetStateCommand()
 			break
 		}
 	case "changestate":
@@ -56,17 +72,33 @@ func CommandManager(args ...string) {
 				fmt.Printf("changeState err: %v\n", argsNotMatch)
 				break
 			}
-			ChangeStateCommand(args[1], cast.ToInt(args[2]))
+			c.ChangeStateCommand(args[1], cast.ToInt(args[2]))
 			break
 		}
+	case "changeuser":
+		{
+			if len(args) != 2 {
+				fmt.Printf("changeUser err: %v\n", argsNotMatch)
+				break
+			}
+			c.ChangeUserCommand(args[1])
+			break
+		}
+
 	case "save":
 		{
-			Save()
+			c.Save()
 			break
 		}
+	case "fresh":
+		{
+			c.Fresh()
+			break
+		}
+
 	case "exit":
 		{
-			Exit()
+			c.Exit()
 			break
 		}
 
@@ -77,19 +109,23 @@ func CommandManager(args ...string) {
 }
 
 func Help() {
-	fmt.Printf("CommandManager help:\n")
-	fmt.Printf("[display]:                                                     	display all matter\n")
+	fmt.Printf("Manager help:\n")
+	fmt.Printf("[display]:                                                     	display curr user info\n")
 	fmt.Printf("[adduser $usrname]:                                            	add user\n")
 	fmt.Printf("[addmatter option{$gapUnit $startTime $endTime} $title $desc]: 	add matter\n")
 	fmt.Printf("[getstate]:                                                    	get all state\n")
 	fmt.Printf("[changestate $matterTitle $stateNumber]:                       	change matter state\n")
+	fmt.Printf("[changeuser $usrname]:              								change curr user\n")
+	fmt.Printf("[save]:                                                       	save\n")
+	fmt.Printf("[fresh]:                                                      	fresh currInfo\n")
+	fmt.Printf("[exit]:                                                         	exit\n")
 }
 
-func DisplayCommand() {
-	dailymatter.Display()
+func (c *CommandManager) DisplayCommand() {
+	c.dp.Display()
 }
 
-func NewUserCommand(userid string) {
+func (c *CommandManager) NewUserCommand(userid string) {
 	err := dailymatter.InsertNewUser(userid)
 	if err != nil {
 		fmt.Printf("NewUserCommand err: %v", err)
@@ -108,7 +144,7 @@ type InsertedMatterInfo struct {
 
 */
 
-func NewMatterCommand(time []string, info []string) {
+func (c *CommandManager) NewMatterCommand(time []string, info []string) {
 	if len(info) != 2 {
 		fmt.Printf("NewMatterCommand err: %v", fmt.Errorf("format illegal"))
 		return
@@ -129,7 +165,7 @@ func NewMatterCommand(time []string, info []string) {
 	}
 }
 
-func GetStateCommand() {
+func (c *CommandManager) GetStateCommand() {
 	states := state.GetAllState()
 	fmt.Printf("All State hash: \nindex:\t\tstate\n")
 	for i, v := range states {
@@ -137,22 +173,39 @@ func GetStateCommand() {
 	}
 }
 
-func ChangeStateCommand(matterTitle string, stateIdx int) {
+func (c *CommandManager) ChangeStateCommand(matterTitle string, stateIdx int) {
 	states := state.GetAllState()
 	if stateIdx >= len(states) {
 		fmt.Printf("ChangeStateCommand err: %v", fmt.Errorf("idx out of range"))
 	}
-	dailymatter.ChangeMatterState(matterTitle, states[stateIdx])
+	err := dailymatter.ChangeMatterState(matterTitle, states[stateIdx])
+	if err != nil {
+		fmt.Printf("ChangeStateCommand err: %v", err)
+	}
 }
 
-func Save() {
+func (c *CommandManager) ChangeUserCommand(userid string) {
+	err := dailymatter.ChangeCurrUser(userid)
+	if err != nil {
+		fmt.Printf("ChangeUserCommand err: %v", err)
+	}
+}
+
+func (c *CommandManager) Save() {
 	err := dailymatter.Save()
 	if err != nil {
 		fmt.Printf("Save err: %v", err)
 	}
 }
 
-func Exit() {
-	Save()
+func (c *CommandManager) Fresh() {
+	err := dailymatter.FreshCurrInfo()
+	if err != nil {
+		fmt.Printf("Fresh err: %v", err)
+	}
+}
+
+func (c *CommandManager) Exit() {
+	c.Save()
 	fmt.Printf("Exiting...")
 }
