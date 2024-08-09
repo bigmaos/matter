@@ -1,13 +1,13 @@
 package http
 
 import (
+	"daily_matter/util/task"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mlee-msl/taskgroup"
 )
 
 type Router interface {
@@ -62,28 +62,33 @@ func (m *ServerManager) RunServer() {
 
 // 并发start server
 func (m *ServerManager) StartServers() error {
-	var tasks []*taskgroup.Task
-
-	taskfNO := 0
-	for _, server := range m.servers {
-		tasks = append(tasks,
-			taskgroup.NewTask(uint32(taskfNO),
-				func() (interface{}, error) {
-					return nil, server.Start()
-				},
-				true))
-		taskfNO++
-	}
-
-	tg := taskgroup.NewTaskGroup(
-		taskgroup.WithWorkerNums(uint32(len(tasks))),
+	// 注册tasks
+	var (
+		taskUnits []*task.TaskUnit
+		taskfNO   = 0
 	)
-
-	tg.AddTask(tasks...)
-	_, err := tg.Run()
-	if err != nil {
-		return fmt.Errorf("start server error:%v", err)
+	for _, server := range m.servers {
+		startFunc := func() (interface{}, error) {
+			return nil, server.Start()
+		}
+		taskfNO++
+		taskUnits = append(taskUnits, &task.TaskUnit{
+			TaskNO: taskfNO,
+			TaskF:  startFunc,
+		})
 	}
+
+	tp := task.TaskPacker{}
+	err := tp.InitTaskGroup(taskUnits, true)
+	if err != nil {
+		return fmt.Errorf("start server error:\n%v", err)
+	}
+
+	_, err = tp.RunTaskGroupOnce()
+	if err != nil {
+		return fmt.Errorf("start server error:\n%v", err)
+	}
+
 	return nil
 }
 
